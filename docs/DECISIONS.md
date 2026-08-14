@@ -14,6 +14,8 @@ This cloud development environment cannot reach `dl.google.com` (only `maven.goo
 
 **Decision:** pin to AGP **8.13.0** (last stable 8.x release, explicitly documents "Kotlin 2.3 support"), Kotlin **2.3.21** (latest 2.3.x patch, matches AGP's stated compatibility — true latest stable Kotlin was 2.4.10, but that combination with AGP 8.13 is unverified), Compose BOM **2026.01.00** (predates the 2026.08.00 BOM's requirement of AGP 9.1.1+), Media3 **1.11.0**. Revisit the AGP 9 migration once the app has a working baseline that's been verified on-device, so any migration issues surface against a known-good comparison point rather than compounding with first-build risk.
 
+**Lesson learned (from an actual CI failure, not foreseeable by reading docs alone):** individual androidx libraries carry their own `minCompileSdk` AAR-metadata requirement independent of the Compose BOM — picking each library's own latest version bumped `core-ktx` to 1.19.0, `lifecycle-runtime-ktx` to 2.11.0, and transitively `lifecycle-runtime-compose` to 2.11.0, all of which silently require compileSdk 37 / AGP 9.1+, breaking `:app:checkDebugAarMetadata` even though the Compose BOM itself was fine. Fixed by pinning each to its last version explicitly documented as "compiled against API 36": `core-ktx` **1.17.0**, `lifecycle-runtime-ktx` **2.10.0**, `activity-compose` **1.11.0**. When bumping any androidx dependency in this project while still on AGP 8.13/compileSdk 36, check that library's own release notes for a compileSdk/AGP floor bump, not just whether the version number exists.
+
 ---
 
 ## Pending: Architecture A vs B (Spike A)
