@@ -6,6 +6,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -66,7 +68,13 @@ fun PlayerScreen(activity: Activity, modifier: Modifier = Modifier) {
 
     Box(modifier = modifier.fillMaxSize()) {
         AndroidView(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                // Tap anywhere on the video to pause -- needed to hold a frame while
+                // reading the HUD during on-device testing.
+                .pointerInput(Unit) {
+                    detectTapGestures { playerEngine.togglePlayPause() }
+                },
             factory = { ctx ->
                 val surfaceView = SurfaceView(ctx)
                 surfaceView.holder.addCallback(object : SurfaceHolder.Callback {

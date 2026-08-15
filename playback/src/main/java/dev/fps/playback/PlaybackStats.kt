@@ -28,9 +28,14 @@ class PlaybackStatsCollector : AnalyticsListener, VideoFrameMetadataListener {
     private val _stats = MutableStateFlow(PlaybackStats())
     val stats: StateFlow<PlaybackStats> = _stats
 
+    // Touched only from the playback thread, inside onVideoFrameAboutToBeRendered.
     private val recentFrameTimestamps = ArrayDeque<Long>()
-    private var totalDropped = 0
     private var lastEmitNanos = 0L
+
+    // Written from the player's application looper but read on the playback
+    // thread, so it needs to be volatile or the HUD can report a stale count.
+    @Volatile
+    private var totalDropped = 0
 
     fun attachTo(player: ExoPlayer) {
         player.addAnalyticsListener(this)

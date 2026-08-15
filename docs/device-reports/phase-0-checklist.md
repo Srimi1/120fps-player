@@ -39,6 +39,7 @@ Any local videos will do, but the useful set is:
 - [ ] Video plays, correct aspect ratio, not stretched or cropped
 - [ ] **Audio/video sync is correct** — watch someone speaking for ~30s
 - [ ] Playback is smooth (some judder on pans is *expected and normal* at 24fps — that's the problem we're here to solve later)
+- [ ] **Tap the video to pause, tap again to resume** — useful for holding a frame while reading the HUD
 
 ### 3. Playback — 1080p 60fps
 - [ ] Plays correctly with sync

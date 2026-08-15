@@ -25,6 +25,10 @@ class PlayerEngine(context: Context) {
         player.playWhenReady = true
     }
 
+    fun togglePlayPause() {
+        player.playWhenReady = !player.playWhenReady
+    }
+
     fun addListener(listener: Player.Listener) {
         player.addListener(listener)
     }
