@@ -16,4 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "120fps-player"
 
-include(":app", ":playback")
+include(":app", ":playback", ":interp-core")

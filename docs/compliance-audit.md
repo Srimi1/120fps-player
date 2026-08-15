@@ -34,7 +34,11 @@ Every performance claim in `plan.md` and `docs/research/feasibility-report.md` t
 
 *Note:* the explicit `measured`/`cited`/`assumed` vocabulary is introduced by this constitution and has not been retro-applied to existing docs. Everything currently in the repo is tier `cited` or `assumed`; **nothing is tier `measured`,** because nothing has run on hardware yet.
 
-*Related gap (fixed in this change):* CI ran `./gradlew test` against zero test sources — a check that passes trivially and proves nothing, which is precisely the false-confidence Article 1 exists to prevent. The step is now explicitly annotated as intentionally empty until `interp-core` lands in Phase 2, and `./gradlew lint` was added to give the pipeline at least one check with real signal against existing code.
+*Related gap (fixed in this change):* CI ran `./gradlew test` against zero test sources — a check that passes trivially and proves nothing, which is precisely the false-confidence Article 1 exists to prevent. Fixed properly rather than annotated: the `interp-core` module now exists as a plain JVM module with **15 passing tests** covering the cadence/retiming math, and `./gradlew lint` was added for signal on the Android code.
+
+Those tests are the first genuinely `measured` facts in the repo — they were executed, not asserted. They also independently confirm two research claims: 24→120 is a clean 5× (phases 0/.2/.4/.6/.8), and 24→60 is 2.5× requiring arbitrary phases (0/.4/.8/.2/.6), which is why midpoint-only networks could not serve this project even setting performance aside. The drift test quantifies the bug the integer arithmetic prevents: a naive per-frame accumulator drifts **288 ms across a two-hour film**.
+
+Note the tests verify *logic*, not playback. They say nothing about whether the app works on a phone — that remains Article 9's open item.
 
 ## Article 2 — Reversible decisions are written down · PASS
 

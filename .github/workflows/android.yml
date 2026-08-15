@@ -20,10 +20,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # No test sources exist yet — this step is intentionally empty until the
-      # pure-Kotlin interp-core module lands in Phase 2 (cadence math, scene-cut
-      # and thermal state machines are the first genuinely unit-testable logic).
-      # Kept wired up so tests run from the moment they appear.
+      # interp-core is a plain JVM module with no Android dependency, so its
+      # tests are the one part of this project verifiable without a device or
+      # the Android SDK. Keep timing and state-machine logic there.
       - name: Unit tests
         run: ./gradlew test --stacktrace
 
