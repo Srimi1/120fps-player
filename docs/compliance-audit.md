@@ -1,8 +1,8 @@
 # Constitution Compliance Audit
 
 **Date:** 2026-08-15
-**Commit audited:** `c71c907` (branch `claude/120fps-realtime-player-25ie4s`, PR #1 draft)
-**Project state:** Phase 0 complete in CI (run #5 green), Phase 1 spikes not started
+**Commit audited:** `cd98d0e` (branch `claude/120fps-realtime-player-25ie4s`, PR #1 draft)
+**Project state:** Phase 0 builds and packages in CI; 15 unit tests pass in CI; Phase 1 spikes not started; **nothing yet run on hardware**
 
 Re-run this audit at every phase boundary. Statuses: **PASS** / **OPEN** (violated, unresolved) / **N/A** (article governs code that does not exist yet) / **FLAG** (needs a human decision).
 
@@ -85,6 +85,20 @@ The constraint is documented in `docs/DECISIONS.md`, including the concrete fail
 The one genuinely undocumented dependency — whether a frame-rate-*increasing* `GlShaderProgram` works in Media3's live playback path — is scheduled as Spike A before any engine work, and Architecture B (ExoPlayer decoding to our own `SurfaceTexture` with a Choreographer-paced EGL loop) is written down in `DECISIONS.md` as the escape hatch. Spikes B (120 Hz grant) and C (Qualcomm GL extensions) cover the other two unknowns. No current plan step depends on unverified platform behavior without a fallback.
 
 ---
+
+---
+
+## Appendix — findings from reviewing never-executed code
+
+Article 10 says CI is the compiler and code must be written to be right the first time. A deliberate review pass over the Phase 0 sources — none of which had ever been compiled or run when written — found three defects, which is the evidence for why that article matters:
+
+1. **Plugin resolution (build-breaking).** `:interp-core` requested `org.jetbrains.kotlin.jvm` with a version, but the jvm and android Kotlin plugins ship in one jar; the plugin was already on the classpath with an unresolvable version and plugin resolution failed outright. Fixed by declaring it once at the root with `apply false`, matching the other four plugins.
+
+2. **Data race in the measurement instrument.** `PlaybackStatsCollector.totalDropped` was written from the player's application looper and read from the playback thread with no synchronisation, so the HUD could report a stale dropped-frame count. Since the HUD *is* the instrument every Phase 0 and Phase 1 measurement depends on, an unreliable reading would corrupt the data the whole plan is steered by. Now `@Volatile`.
+
+3. **No pause control.** The device checklist asks for a five-minute stability run while reading HUD values, which is impractical when the picture cannot be held. Tap-to-toggle added.
+
+Also checked and found *not* to be a problem: `PlayerEngine` exposes `@UnstableApi` media3 types without an opt-in annotation, which was expected to trip lint's error-severity `UnsafeOptInUsageError`. `./gradlew lint` passes, so no change was made — recorded here so the question is not re-litigated later.
 
 ## Actions arising
 
