@@ -4,9 +4,15 @@
 /.idea/
 .DS_Store
 /build
+# Not just the root one: :app, :playback and :interp-core each produce a build/
+# directory, and "/build" does not match those.
+build/
 /captures
 .externalNativeBuild
 .cxx
 local.properties
 *.hprof
 *.apk
+# ...except the released build, which is committed on purpose so the APK can be
+# downloaded straight from the repo rather than dug out of a CI run's artifacts.
+!dist/*.apk

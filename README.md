@@ -4,7 +4,7 @@ A video player for Android that uses the phone's own GPU to generate extra frame
 
 Think VLC or KMPlayer, but with motion interpolation — the "soap opera effect" your TV does — running live on the device during playback.
 
-> **Status: early.** Phase 0 (a working player with a diagnostics HUD) builds and is CI-green. **No frame interpolation is implemented yet**, and nothing has been verified on real hardware. See [Current status](#current-status).
+> **Status: early.** Phase 0 — a working player with a diagnostics HUD — builds, is CI-green, and now runs: it has been exercised on an Android 12 emulator. **No frame interpolation is implemented yet**, and nothing has been verified on the target phone. See [Current status](#current-status).
 
 ## The honest verdict
 
@@ -21,15 +21,36 @@ Notably, **AI frame interpolation (RIFE and similar) was measured and ruled out*
 
 ## Current status
 
-Phase 0 is built: a Media3/ExoPlayer-based player that opens a local video, plays it, requests 120 Hz from the display, and shows a live HUD with rendered fps, dropped frames, **the refresh rate the OS actually granted**, thermal headroom, and battery draw.
+Phase 0 is built: a Media3/ExoPlayer-based player that opens a local video, plays it full-screen with
+transport controls, requests 120 Hz from the display, and shows a live diagnostics panel with rendered
+fps, dropped frames, **the refresh rate the OS actually granted**, the source frame rate, thermal
+headroom, and battery draw.
 
-That HUD is the point of Phase 0 — the granted-refresh-rate reading tells us how much of the 120fps plan is reachable at all.
+That panel is the point of Phase 0 — the granted-refresh-rate reading tells us how much of the 120fps
+plan is reachable at all. It also reports the **cadence for the rate that was granted**: the ratio,
+the frames per second an interpolator would have to synthesise, and the per-frame budget. Those are
+computed live by `:interp-core` from the two observed rates, and they are the plan, not a
+measurement — nothing is being interpolated.
 
-**Not yet verified on a device.** CI proves the app compiles and packages; it proves nothing about whether it plays video correctly. Closing that gap is the next step — see the [Phase 0 checklist](docs/device-reports/phase-0-checklist.md).
+**Verified running, on an emulator.** The app has been installed and exercised on an Android 12 / API
+31 emulator: it plays, letterboxes correctly, seeks, survives being killed, and reports plausible
+numbers. That run found four defects that code review had missed, and is written up in
+[`docs/device-reports/emulator-api31-results.md`](docs/device-reports/emulator-api31-results.md).
+
+**Not yet verified on the target phone, and Phase 0 is therefore not done.** The emulator's panel is
+60 Hz and its decoder is software, so it cannot answer either question Phase 0 exists for: whether
+Samsung's LTPO panel will grant 120 Hz to a decoding app, and what happens thermally under load.
+Closing that gap is the next step — see the [Phase 0 checklist](docs/device-reports/phase-0-checklist.md).
 
 ## Try it
 
-CI builds a debug APK on every push. Grab it from the [Actions tab](https://github.com/Srimi1/120fps-player/actions): open the latest green **Android CI** run → **Artifacts** → `app-debug`. Install on an Android 12+ device.
+A prebuilt debug APK is committed in the repo:
+
+**[`dist/120fps-player-0.1.0-debug.apk`](dist/)** — download it, transfer to an Android 12+ phone, install (allow "install from unknown sources").
+
+CI also builds one on every push, if you want the build for a specific commit: [Actions tab](https://github.com/Srimi1/120fps-player/actions) → latest green **Android CI** run → **Artifacts** → `app-debug`.
+
+**Using it:** tap **Open a video** or send it a file from any file manager with *Open with*. Tap once for the controls, double-tap to pause. Tap the `DIAGNOSTICS` panel to expand it.
 
 If you run it, [file a report](docs/device-reports/phase-0-checklist.md) — device data is the bottleneck on this project.
 
@@ -49,7 +70,7 @@ Each phase ends in an installable APK and an on-device report.
 
 | Phase | What |
 |---|---|
-| **0** ✅ built | Player scaffold, 120 Hz request, diagnostics HUD |
+| **0** ✅ built, runs | Player scaffold, 120 Hz request, diagnostics HUD. Awaiting an on-device report to be *done*. |
 | **1** | Three de-risking spikes: can Media3 emit extra frames during playback; will the S24 Ultra grant 120 Hz to a video app; are Qualcomm's hardware motion-estimation GL extensions available |
 | **2** | Frame pacing/retiming infrastructure + blend-based smoothing (the first visible feature) |
 | **3** | The real engine: GPU motion-compensated interpolation |
